@@ -11,7 +11,7 @@ authors = [
 ]
 description = "Template for rDistributed Systems laboratory"
 requires-python = ">=3.10"
-dependencies = ['zeroc-ice']
+dependencies = ['zeroc-ice','fs']
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -21,7 +21,7 @@ license = "GPL-3.0-only"
 
 [project.scripts]
 remotetypes = "remotetypes.command_handlers:remotetypes_server"
-
+remotetypes-client = "remotetypes.appclient:main"
 [project.optional-dependencies]
 tests = ["pytest"]
 linters = ["mypy", "pylint", "ruff"]
