@@ -11,7 +11,7 @@ class RemoteList(rt.RList):
     """ Falta getItem y append"""
 
     def __init__(self, identifier) -> None:
-        """Initialise a RemoteSet with an empty StringSet."""
+        """Initialise a RemoteSet with an empty StringList."""
         self._storage_ = StringList()
         self.id_ = identifier
 
@@ -20,31 +20,31 @@ class RemoteList(rt.RList):
         return self.id_
 
     def remove(self, item: str, current: Optional[Ice.Current] = None) -> None:
-        """Remove an item from the StringSet if added. Else, raise a remote exception."""
+        """Remove an item from the StringList if added. Else, raise a remote exception."""
         dat=self._storage_[item]
         try:
             self._storage_.remove(dat)
         except KeyError as error:
             raise rt.KeyError(item) from error
     def getItem(self, item: int, current: Optional[Ice.Current] = None) -> str:
-        """Remove and return an element from the storage."""
+        """getItem and return an element from the storage."""
         try:
-            return self._storage_.[item]
+            return self._storage_.index(item)
 
         except KeyError as error:
             raise rt.KeyError(item) from error
 
 
     def length(self, current: Optional[Ice.Current] = None) -> int:
-        """Return the number of elements in the StringSet."""
+        """Return the number of elements in the StringList."""
         return len(self._storage_)
 
     def contains(self, item: str, current: Optional[Ice.Current] = None) -> bool:
-        """Check the pertenence of an item to the StringSet."""
+        """Check the pertenence of an item to the StringList."""
         return item in self._storage_
 
     def hash(self, current: Optional[Ice.Current] = None) -> int:
-        """Calculate a hash from the content of the internal StringSet."""
+        """Calculate a hash from the content of the internal StringList."""
         contents = list(self._storage_)
         contents.sort()
         return hash(repr(contents))
@@ -53,11 +53,11 @@ class RemoteList(rt.RList):
         """Create an iterable object."""
 
     def append(self, item: str, current: Optional[Ice.Current] = None) -> None:
-        """Add a new string to the StringSet."""
+        """Add a new string to the StringList."""
         self._storage_.add(item)
 
     def pop(self, item: int,current: Optional[Ice.Current] = None) -> str:
-        """Remove and return an element from the storage."""
+        """Remove and return an element with item from the storage."""
         try:
             return self._storage_.pop(item)
 

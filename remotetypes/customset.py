@@ -44,7 +44,7 @@ class StringSet(set):
         return super().__contains__(o)
 
 class StringList(list):
-    """Set that only allows adding str objects."""
+    """List that only allows adding str objects."""
 
     def __init__(
         self,
@@ -54,14 +54,14 @@ class StringList(list):
     ) -> None:
         """Build an unordered collection of unique elements of type str.
 
-        StringSet() -> new empty StringSet object
-        StringSet(iterable) -> new StringSet object
+        StringList() -> new empty StringList object
+        StringList(iterable) -> new StringList object
         """
         self.upper_case = force_upper_case
         super().__init__(*args, **kwargs)
 
     def append(self, item: str) -> None:
-        """Add an element to a set. Checks the element type to be a str."""
+        """Add an element to a List. Checks the element type to be a str."""
         if not isinstance(item, str):
             raise ValueError(item)
 
@@ -71,14 +71,17 @@ class StringList(list):
         return super().append(item)
 
     def remove(self, item: str) -> None:
-        """Add an element to a set. Checks the element type to be a str."""
+        """Remove an element to a List. Checks the element type to be a str."""
         if not isinstance(item, str):
             raise ValueError(item)
 
         if self.upper_case:
             item = item.upper()
 
-        return super().remove(item)
+        return super().remove(indice)
+    def index(self, item: str) -> str:
+        """Get an element to a List."""
+        return super().index(indice)
 
     def __contains__(self, o: object) -> bool:
         """Overwrite the `in` operator.
@@ -94,7 +97,7 @@ class StringList(list):
         return super().__contains__(o)
 
 class StringDict(dict):
-    """Set that only allows adding str objects."""
+    """Dict that only allows adding str objects."""
 
     def __init__(
         self,
@@ -104,14 +107,14 @@ class StringDict(dict):
     ) -> None:
         """Build an unordered collection of unique elements of type str.
 
-        StringSet() -> new empty StringSet object
-        StringSet(iterable) -> new StringSet object
+        StringDict() -> new empty StringDict object
+        StringDict(iterable) -> new StringDict object
         """
         self.upper_case = force_upper_case
         super().__init__(*args, **kwargs)
 
     def update(self, key: str, item: str) -> None:
-        """Add an element to a set. Checks the element type to be a str."""
+        """Add an element to a dict. Checks the element type to be a str."""
         if not isinstance(item, str):
             raise ValueError(item)
         if not isinstance(key, str):
@@ -122,15 +125,25 @@ class StringDict(dict):
 
         return super().update(valor)
 
-    def remove(self, item: str) -> str:
-        """Add an element to a set. Checks the element type to be a str."""
+    def get(self, key: str) -> str:
+        """Get an element to a dict. Checks the element type to be a str."""
         if not isinstance(item, str):
-            raise ValueError(item)
+            raise ValueError(key)
 
         if self.upper_case:
             item = item.upper()
 
-        return super().pop(item)
+        return super().get(key)
+
+    def remove(self, key: str) -> str:
+        """Remove an element to a dict. Checks the element type to be a str."""
+        if not isinstance(item, str):
+            raise ValueError(key)
+
+        if self.upper_case:
+            item = item.upper()
+
+        return super().pop(key)
 
     def __contains__(self, o: object) -> bool:
         """Overwrite the `in` operator.
