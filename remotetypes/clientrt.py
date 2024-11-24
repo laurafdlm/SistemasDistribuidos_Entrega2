@@ -7,51 +7,6 @@ import os
 shaold=''
 import Ice
 import RemoteTypes as rt 
-class FuncDict:
-    def remove(msg):
-        rtdato.remove(msg)
-    def length():
-        return rtdato.length()
-    def contains(msg):
-        return rtdato.contains(msg)
-    def hash():
-        return rtdato.hash()
-    def setItem(msg1,msg2):
-        rtdato.setItem({msg1:msg2})
-    def getItem(msg):
-        return rtdato.getItem(msg)
-    def pop(msg):
-        return rtdato.pop(msg)
-
-class FuncList:
-    def remove(msg):
-        rtdato.remove(msg)
-    def length():
-        return rtdato.length()
-    def contains(msg):
-        return rtdato.contains(msg)
-    def hash():
-        return rtdato.hash()
-    def append(msg):
-        rtdato.append(msg)
-    def pop(msg):
-        return rtdato.pop(msg)
-    def getItem(msg):
-        return rtdato.getItem(msg)
-
-class FuncSet:
-    def remove(msg):
-        rtdato.remove(msg)
-    def length():
-        return rtdato.length()
-    def contains(msg):
-        return rtdato.contains(msg)
-    def hash():
-        return rtdato.hash()
-    def add(msg):
-        rtdato.add(msg)
-    def pop():
-        return rtdato.pop()
 
 def Clientrt(ic):
     global datos
@@ -62,7 +17,7 @@ def Clientrt(ic):
     except:
         print('Error connexión Proxy')
         time.sleep(3)
-        quit
+        return(1)
     print(operador)
     time.sleep(4)
     tipodato=input('Tipo de datos: (0-Salir,1-Set,2-List,3-Dict)')
@@ -72,39 +27,57 @@ def Clientrt(ic):
         except:
             numero=99
         if numero == 0:
-            quit()
+            return(0)
         if numero == 1:
             nombre="Set"
             tiponombre=rt.TypeName.RSet
-            menus=['remove','length','contains','hash','add','pop']
+            menus=['remove','length','contains','hash','add','pop','saveTofile']
             cero=[2,4,6]
             uno=[1,3,5]
             dos=[]
+            try:
+                rtdatmp=operador.get(tiponombre)
+                rtdato=rt.RSetPrx.checkedCast(rtdatmp)
+            except:
+                print('Error Connexión Servicor')
+                time.sleep(3)
+                return(1)
+            print(type(rtdato))
             break
         if numero == 2:
             nombre="List"
             tiponombre=rt.TypeName.RList
-            menus=['remove','length','contains','hash','append','pop','getItem']
+            menus=['remove','length','contains','hash','append','pop','getItem','saveTofile']
             cero=[2,4]
             uno=[1,3,5,6,7]
             dos=[]
+            try:
+                rtdatmp=operador.get(tiponombre)
+                rtdato=rt.RListPrx.checkedCast(rtdatmp)
+            except:
+                print('Error Connexión Servicor')
+                time.sleep(3)
+                return(1)
+            print(type(rtdato))
             break
         if numero == 3:
             nombre="Dict"
             tiponombre=rt.TypeName.RDict
-            menus=['remove','length','contains','hash','setItem','getItem','pop']
+            menus=['remove','length','contains','hash','setItem','getItem','pop','saveTofile']
             cero=[2,4]
             uno=[1,3,6,7]
             dos=[5]
+            try:
+                rtdatmp=operador.get(tiponombre)
+                rtdato=rt.RDictPrx.checkedCast(rtdatmp)
+            except:                                                                 
+                print('Error Connexión Servicor')
+                time.sleep(3)
+                return(1)
+            print(type(rtdato))
             break
+
     while True:
-        try:
-            proxytype=operador.get(tiponombre)
-        except:
-            print('Error Connexión Servicor')
-            time.sleep(3)
-            exit(1)
-        print(proxytype)
         contador=1
         for i in menus:
             print(contador,' Si quieres ejecutar la función: ',i)
@@ -112,60 +85,99 @@ def Clientrt(ic):
         print ( '0 Salir')
         valor= input('Entra el numero de opción: (0-{})'.format(contador -1))
         try:
-            numero=int(valor)
+            operador=int(valor)
         except:
-            numero=99
-        if numero == 0:
-            quit()
-        if numero in range(1,len(menus)):
-            try:
-                rtdato=operador.get(tiponombre)
-            except:
-                print('Error Connexión Servicor')
-                time.sleep(3)
-                exit(1)
-            print(rtdato)
-            while True:
-                datos=""
-                if numero in cero:
-                    if nombre == "Dict":
-                        valor=getattr(FuncDict, menus[numero-1])()
-                    elif nombre=="List":
-                        valor=getattr(FuncList, menus[numero-1])()
-                    elif nombre=="Set":
-                        valor=getattr(FuncSet, menus[numero-1])()
-                    print(valor)
-                    time.sleep(1)
+            operador=99
+        if operador == 0:
+            return(0)    
+        while True:
+            datos=""
+            if operador in uno:
+                dattmp=input('Introduce el valor o key necesario(Solo caracteres)')
+                try:
+                    msg=str(dattmp)
+                except:
+                    print('Valor no valido')
+                    continue
+                if msg == "":
                     break
-                elif numero in uno:
-                    dattmp=input('Introduce el valor o key necesario(Solo caracteres)')
+            if operador in dos:
+                datkey=input('Introduce la key del Dict(Solo caracteres)')
+                datvalue=input('Introduce el valor del Dict(Solo caracteres)')
+                try:
+                    msg1=str(datkey)
+                    msg2=str(datvalue)
+                except:
+                    print('Valores no validos')
+                    continue
+                if msg1 == "":
+                    break
+            if nombre == "Set":
+                valor=""
+                if operador == 1:
+                    rtdato.remove(msg)
+                if operador == 2:
+                    valor=rtdato.length()
+                if operador == 3:
+                    valor=rtdato.contains(msg)
+                if operador == 4:
+                    valor=rtdato.hash()
+                if operador == 5:
+                    rtdato.add(msg)
+                if operador == 6:
+                    valor=rtdato.pop()
+                if operador ==7:
+                    rtdato.add('9999999999')
+                    valor=rtdato.pop()
+
+            if nombre == "List":
+                if operador == 1:
+                    rtdato.remove(msg)
+                if operador == 2:
+                    valor=rtdato.length()
+                if operador == 3:
+                    valor=rtdato.contains(msg)
+                if operador == 4:
+                    valor=rtdato.hash()
+                if operador == 5:
+                    rtdato.append(msg)
+                    valor=msg
+                if operador == 6:
                     try:
-                        datos=str(dattmp)
+                        dat=int(msg)
                     except:
-                        continue
-                    valor=""
-                    if nombre=="Dict":
-                       valor=getattr(FuncDict, menus[numero-1])(datos)
-                    elif nombre=="List":
-                        valor=getattr(FuncList, menus[numero-1])(datos)
-                    elif nombre=="Set":
-                        print(rtdato)
-                        print(type(rtdato))
-                        valor=rtdato.contains(datos)
-#                        valor=getattr(FuncSet, menus[numero-1])(datos)
-                    print(valor)
-                    time.sleep(1)
-                    break
-                elif numero in dos:
-                    datkey=input('Introduce la key del Dict(Solo caracteres)')
-                    datvalue=input('Introduce el valor del Dict(Solo caracteres)')
+                        print('Error, Necesito el numero de indice')
+                        break
+                    valor=rtdato.pop(dat)
+                if operador == 7:
                     try:
-                        dickey=str(datkey)
-                        dicvalue=str(datvalue)
+                        dat=int(msg)
                     except:
-                        continue
-                    valor=getattr(FuncDict, menus[numero-1])(dickey,dicvalue)
-                    print(valor)
-                    time.sleep(1)
-                    break
+                        print('Error, Necesito el numero de indice')
+                        break
+                    valor=rtdato.getItem(dat)
+                if operador ==8:
+                    valor=rtdato.pop(999999)
+
+            if nombre == "Dict":
+                if operador == 1:
+                    rtdato.remove(msg)
+                if operador == 2:
+                    valor=rtdato.length()
+                if operador == 3:
+                    valor=rtdato.contains(msg)
+                if operador == 4:
+                    valor=rtdato.hash()
+                if operador == 5:
+                    rtdato.setItem(msg1,msg2)
+                    valor=rtdato.getItem(msg1)
+                if operador == 6:
+                    valor=rtdato.getItem(msg)
+                if operador == 7:
+                    valor=rtdato.pop(msg)
+                if operador ==8:
+                    valor=rtdato.pop('999999')
+            print(valor)
+            time.sleep(1)
+            break
 

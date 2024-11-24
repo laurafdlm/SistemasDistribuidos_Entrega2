@@ -1,5 +1,6 @@
 """Needed classes for implementing the Iterable interface for different types of objects."""
 
+import os.path
 import RemoteTypes as rt  # noqa: F401; pylint: disable=import-error
 
 # TODO: It's very likely that the same Iterable implementation doesn't fit
@@ -9,3 +10,19 @@ import RemoteTypes as rt  # noqa: F401; pylint: disable=import-error
 
 class Iterable(rt.Iterable):
     """Skeleton for an Iterable implementation."""
+    def next(self) -> str:
+        while True:
+            self._nextId=self._nextId+1
+            contador=("000000000"+str(self._nextId))[-8:]
+            path='./datos/'+contador
+            if not os.path.isfile(path):
+                if contador =='00200000':
+                    self.netId=0
+                    contador='00000000'
+                break
+        return contador
+
+    def __init__(self):
+        self._nextId = 0
+
+

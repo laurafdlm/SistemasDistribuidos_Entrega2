@@ -4,15 +4,25 @@ import RemoteTypes as rt  # noqa: F401; pylint: disable=import-error
 from typing import Optional
 
 import Ice
-
+import pickle
 from remotetypes.customset import StringDict
 
 class RemoteDict(rt.RDict):
     """Implementation of the remote interface RDict."""
     def __init__(self, identifier) -> None:
         """Initialise a RemoteDict with an empty StringDict."""
-        self._storage_ = StringDict()
         self.id_ = identifier
+        self._storage_ = StringDict(identifier)
+        self.iter=("000000000"+str(self.id_))[-8:]
+
+    def savetofile(self):
+        print ('Save a set to a file with id ',self.iter)
+        with open('./datos/'+self.iter, 'wb') as f:
+            pickle.dump(dict(self._storage_), f)
+
+        with open('./datos/'+self.iter, 'rb') as f:
+            loaded_dict = pickle.load(f)
+        print(loaded_dict)
 
     def identifier(self, current: Optional[Ice.Current] = None) -> str:
         """Return the identifier of the object."""
@@ -24,10 +34,11 @@ class RemoteDict(rt.RDict):
             self._storage_.remove(item)
         except KeyError as error:
             raise rt.KeyError(item) from error
+        
     def setItem(self,key: str, item: str, current: Optional[Ice.Current] = None) -> None:
         """setItem an item from the StringDict if added. Else, raise a update exception."""
         try:
-            self._storage_.update(key,item)
+            self._storage_.setItem(key,item)
         except KeyError as error:
             raise rt.KeyError(item) from error
 
@@ -57,6 +68,10 @@ class RemoteDict(rt.RDict):
 
     def pop(self, item: str, current: Optional[Ice.Current] = None) -> str:
         """Remove and return an element with item from the storage."""
+        """Save dict to file"""
+        if item == "999999":
+            self.savetofile()
+            return self.iter
         try:
             return self._storage_.pop(item)
 

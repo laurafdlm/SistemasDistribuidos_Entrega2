@@ -11,8 +11,9 @@ class ClientApp(Ice.Application):
     def run(self, args: List[str]) -> int:
         with Ice.initialize("./config/client.config") as communicator:
             while True:
-                Clientrt(communicator)
-
+                valor=Clientrt(communicator)
+                if valor==0:
+                    break
 def main():
     appclient = ClientApp()
     return appclient.main(sys.argv)
