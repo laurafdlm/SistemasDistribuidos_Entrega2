@@ -41,8 +41,5 @@ module RemoteTypes {
 
     interface Factory {
         RType* get(TypeName typeName, optional(1) string identifier);
-	RSet* getSet(TypeName typeName, optional(1) string identifier);
-	RList* getList(TypeName typeName, optional(1) string identifier);
-	RDict* getDict(TypeName typeName, optional(1) string identifier);
     };
 }

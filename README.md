@@ -19,6 +19,9 @@ Or, if you want to modify it during your development,
 ```
 pip install -e .
 ```
+create folder for data
+
+mkdir datos 
 
 ## Execution
 
