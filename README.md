@@ -24,7 +24,7 @@ mkdir datos
 remotetypes --Ice.Config=config/remotetypes.config
 ```
 Open a new window of your terminal for the client
-4. To run the template client, just install the package and run
+To run the template client, just install the package and run
 
 ```
 remotetypes-client
