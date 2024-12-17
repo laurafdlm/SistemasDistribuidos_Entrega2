@@ -10,12 +10,6 @@
 pip install .
 ```
 
-2. create folder for data
-
-```
-mkdir datos
-```
-
 ## Execution
 
 3. To run the template server, just install the package and run
