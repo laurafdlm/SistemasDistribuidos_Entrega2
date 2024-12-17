@@ -1,0 +1,7 @@
+dat01 List uno,dos,tres
+dat02 List Andres,Pedro,Juan
+dat03 Set uno,dos,tres
+dat04 Dict 1:uno,2:dos,3:tres
+dat05 Set abc,def,ghi,jkl
+dat06 Dict a:Andres,c:Carmen,f:Fernando
+00000000

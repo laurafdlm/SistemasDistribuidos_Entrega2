@@ -22,6 +22,7 @@ license = "GPL-3.0-only"
 [project.scripts]
 remotetypes = "remotetypes.command_handlers:remotetypes_server"
 remotetypes-client = "remotetypes.appclient:main"
+remotetypes-test = "remotetypes.apptest:main"
 [project.optional-dependencies]
 tests = ["pytest"]
 linters = ["mypy", "pylint", "ruff"]

@@ -6,6 +6,8 @@ from typing import Optional
 import Ice
 import pickle
 from remotetypes.customset import StringDict
+import os.path
+from remotetypes.iterable import Iterable
 
 class RemoteDict(rt.RDict):
     """Implementation of the remote interface RDict."""
@@ -14,15 +16,29 @@ class RemoteDict(rt.RDict):
         self.id_ = identifier
         self._storage_ = StringDict(identifier)
         self.iter=("000000000"+str(self.id_))[-8:]
+        self.fecha=0.0
+        self._iteratio = Iterable()
+        self.path='./datos/'+self.iter
+        if os.path.isfile(self.path):
+            self.loadtofile()
+            self.fecha=os.path.getmtime(self.path)
 
     def savetofile(self):
         print ('Save a set to a file with id ',self.iter)
+        fechact=float(-1)
+        if os.path.isfile(self.path):
+            fechact=os.path.getmtime(self.path)
+        if fechact > self.fecha:
+            self.iter=self._iteratio.next()
         with open('./datos/'+self.iter, 'wb') as f:
             pickle.dump(dict(self._storage_), f)
 
+    def loadtofile(self):
         with open('./datos/'+self.iter, 'rb') as f:
-            loaded_dict = pickle.load(f)
-        print(loaded_dict)
+            loaded_set = pickle.load(f)
+        print(loaded_set)
+        for i,j in loaded_set.items():
+            self._storage_.setItem(i,j)
 
     def identifier(self, current: Optional[Ice.Current] = None) -> str:
         """Return the identifier of the object."""
@@ -30,6 +46,8 @@ class RemoteDict(rt.RDict):
 
     def remove(self, item: str, current: Optional[Ice.Current] = None) -> None:
         """Remove an item from the StringDict if added. Else, raise a remote exception."""
+        if self.contains(item) == False:
+            return
         try:
             self._storage_.remove(item)
         except KeyError as error:
@@ -69,9 +87,13 @@ class RemoteDict(rt.RDict):
     def pop(self, item: str, current: Optional[Ice.Current] = None) -> str:
         """Remove and return an element with item from the storage."""
         """Save dict to file"""
-        if item == "999999":
+        if item == "99999999":
             self.savetofile()
             return self.iter
+        if item == "88888888":
+            return str(self._storage_)
+        if self.contains(item) == False:
+            return
         try:
             return self._storage_.pop(item)
 

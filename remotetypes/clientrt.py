@@ -7,9 +7,16 @@ import os
 shaold=''
 import Ice
 import RemoteTypes as rt 
+import pickle
 
 def Clientrt(ic):
-    global datos
+    datos=list()
+    variable=""
+    if os.path.isfile("./datos/variables.bin"):
+        with open("./datos/variables.bin","rb") as f:
+            datos = pickle.load(f)
+    else:
+        datos=[["nombre","tipo","iteration"]]
     global shaold
     adapter = ic.propertyToProxy("remotetypes.Proxy")
     try:
@@ -20,13 +27,30 @@ def Clientrt(ic):
         return(1)
     print(operador)
     time.sleep(4)
-    tipodato=input('Tipo de datos: (0-Salir,1-Set,2-List,3-Dict)')
+    nueva=1
+    variable=input('Introduce el nombre de la variable()')
+    for i in datos:
+        if i[0] == variable:
+            if i[1] == "Set":
+                tipodato="1"
+            elif i[1] == 'List':
+                tipodato="2"
+            else:
+                tipodato="3"
+            iteration=i[2]
+            nueva=0
+    if nueva == 1:
+        tipodato=input('Tipo de datos: (0-Salir,1-Set,2-List,3-Dict)')
+        iteration=""
+
     while True:
         try:
             numero=int(tipodato)
         except:
-            numero=99
+            numero=0
         if numero == 0:
+            with open("./datos/variables.bin","wb") as f:
+                pickle.dump(datos,f)
             return(0)
         if numero == 1:
             nombre="Set"
@@ -36,7 +60,7 @@ def Clientrt(ic):
             uno=[1,3,5]
             dos=[]
             try:
-                rtdatmp=operador.get(tiponombre)
+                rtdatmp=operador.get(tiponombre,iteration)
                 rtdato=rt.RSetPrx.checkedCast(rtdatmp)
             except:
                 print('Error Connexión Servicor')
@@ -52,7 +76,7 @@ def Clientrt(ic):
             uno=[1,3,5,6,7]
             dos=[]
             try:
-                rtdatmp=operador.get(tiponombre)
+                rtdatmp=operador.get(tiponombre,"")
                 rtdato=rt.RListPrx.checkedCast(rtdatmp)
             except:
                 print('Error Connexión Servicor')
@@ -68,7 +92,7 @@ def Clientrt(ic):
             uno=[1,3,6,7]
             dos=[5]
             try:
-                rtdatmp=operador.get(tiponombre)
+                rtdatmp=operador.get(tiponombre,"")
                 rtdato=rt.RDictPrx.checkedCast(rtdatmp)
             except:                                                                 
                 print('Error Connexión Servicor')
@@ -89,9 +113,10 @@ def Clientrt(ic):
         except:
             operador=99
         if operador == 0:
+            with open("./datos/variables.bin","wb") as f:
+                pickle.dump(datos,f)
             return(0)    
         while True:
-            datos=""
             if operador in uno:
                 dattmp=input('Introduce el valor o key necesario(Solo caracteres)')
                 try:
@@ -127,9 +152,14 @@ def Clientrt(ic):
                 if operador == 6:
                     valor=rtdato.pop()
                 if operador ==7:
-                    rtdato.add('9999999999')
+                    rtdato.add('99999999')
                     valor=rtdato.pop()
-
+                    if nueva ==0:
+                        for i in datos:
+                            if i[0] == variable:
+                                i[2]=valor
+                    else:
+                        datos.append([variable,nombre,valor])
             if nombre == "List":
                 if operador == 1:
                     rtdato.remove(msg)
@@ -157,7 +187,13 @@ def Clientrt(ic):
                         break
                     valor=rtdato.getItem(dat)
                 if operador ==8:
-                    valor=rtdato.pop(999999)
+                    valor=rtdato.pop(99999999)
+                    if nueva ==0:
+                        for i in datos:
+                            if i[0] == variable:
+                                i[2]=valor
+                    else:
+                        datos.append([variable,nombre,valor])
 
             if nombre == "Dict":
                 if operador == 1:
@@ -176,7 +212,14 @@ def Clientrt(ic):
                 if operador == 7:
                     valor=rtdato.pop(msg)
                 if operador ==8:
-                    valor=rtdato.pop('999999')
+                    valor=rtdato.pop('99999999')
+                    if nueva ==0:
+                        for i in datos:
+                            if i[0] == variable:
+                                i[2]=valor
+                    else:
+                        datos.append([variable,nombre,valor])
+
             print(valor)
             time.sleep(1)
             break
