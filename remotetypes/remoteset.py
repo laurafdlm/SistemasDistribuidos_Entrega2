@@ -2,13 +2,11 @@
 
 from typing import Optional
 import pickle
-import Ice
-import RemoteTypes as rt  # noqa: F401; pylint: disable=import-error
 import os.path
 from remotetypes.customset import StringSet
 from remotetypes.iterable import Iterable
 
-class RemoteSet(rt.RSet):
+class RemoteSet():
     """Implementation of the remote interface RSet."""
 
     def __init__(self, identifier) -> None:
@@ -16,7 +14,6 @@ class RemoteSet(rt.RSet):
         self.id_ = identifier
         self._storage_ = StringSet(identifier)
         self.iter=("000000000"+str(self.id_))[-8:]
-        self.saveact=False
         self.retorno=False
         self.fecha=0.0
         self._iteratio = Iterable()
@@ -42,50 +39,44 @@ class RemoteSet(rt.RSet):
         for i in loaded_set:
             self._storage_.add(i)
 
-    def identifier(self, current: Optional[Ice.Current] = None) -> str:
+    def identifier(self):
         """Return the identifier of the object."""
         return self.id_
 
-    def remove(self, item: str, current: Optional[Ice.Current] = None) -> None:
+    def remove(self, item: str):
         """Remove an item from the StringSet if added. Else, raise a remote exception."""
         if self.contains(item) == True:
             try:
                 self._storage_.remove(item)
-            except KeyError as error:
-                raise rt.KeyError(item) from error
+            except:
+                print("Error remove")    
 
-    def length(self, current: Optional[Ice.Current] = None) -> int:
+    def length(self):
         """Return the number of elements in the StringSet."""
         return len(self._storage_)
 
-    def contains(self, item: str, current: Optional[Ice.Current] = None) -> bool:
+    def contains(self, item: str):
         """Check the pertenence of an item to the StringSet."""
         return item in self._storage_
 
-    def hash(self, current: Optional[Ice.Current] = None) -> int:
+    def hash(self):
         """Calculate a hash from the content of the internal StringSet."""
         contents = list(self._storage_)
         contents.sort()
         return hash(repr(contents))
 
-    def iter(self, current: Optional[Ice.Current] = None) -> rt.IterablePrx:
+    def iter(self):
         """Create an iterable object."""
 
-    def add(self, item: str, current: Optional[Ice.Current] = None) -> None:
+    def add(self, item: str):
         """Add a new string to the StringSet."""
-        if item =='99999999':
-            self.saveact=True
-        elif item =='88888888':
+        if item =='88888888':
             self.retorno=True
         else:
             self._storage_.add(item)
 
-    def pop(self, current: Optional[Ice.Current] = None) -> str:
+    def pop(self):
         """Remove and return an element from the storage."""
-        if self.saveact is True:
-            self.saveact=False
-            self.savetofile()
-            return self.iter
         if self.retorno is True:
             self.retorno=False
             return str(self._storage_)
@@ -93,5 +84,5 @@ class RemoteSet(rt.RSet):
             return
         try:
             return self._storage_.pop()
-        except KeyError as exc:
-            raise rt.KeyError() from exc
+        except:
+            print("Error pop")

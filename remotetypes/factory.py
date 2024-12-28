@@ -1,18 +1,42 @@
 """Needed classes to implement the Factory interface."""
 #import pickle
-import RemoteTypes as rt  # noqa: F401; pylint: disable=import-error
-import Ice
 #from fs.osfs import OSFS
 from remotetypes.remotelist import RemoteList
 from remotetypes.remoteset import RemoteSet
 from remotetypes.remotedict import RemoteDict
 from remotetypes.iterable import Iterable
+from remotetypes.json_server import JsonProducer
+from remotetypes.json_client import JsonConsumer
+import time
 import os.path
+import os, sys
 
-class Factory(rt.Factory):
+class Factory():
+
+    def __init__(self) -> None:
+        """Initialise the Server objects."""
+        super().__init__()
+        self.logger = logging.getLogger(__file__)
+    def run(self, args: list[str]) -> int:
+        producir=JsonProducer()
+        consumir=JsonConsumer()
+        factory=Factory()
+        while True:
+            resultados=consumir.getval('mi_pruebas10')
+            if resultados != "":
+                for i in resultados:
+                    estado=factory.get(i)
+            time.sleep(1)
+            # your code here
+
     """Skeleton for the Factory implementation."""
-    def get(self,typename,opt1,current: Ice.Current=None)->rt.RTypePrx:
-        if typename == rt.TypeName.RSet:
+    def get(self,datos):
+        ident=datos["ident"]
+        typename=datos["object_type"]
+        opt1=datos["object_identifier"]
+        operador=datos["operation"]
+        if typename == "RSet":
+            msg=datos["datos"]
             if len(opt1) != 0 :
                 path='./datos/'+opt1
                 if not os.path.isfile(path):
@@ -23,15 +47,30 @@ class Factory(rt.Factory):
                 iteratio=self._iteratio.next()
             if iteratio == '00000000':
                 print ('Error valor no existe o iteration > 200000')
-                return
+                return False
             print(iteratio)
             newiter=int(iteratio)
-            proxy = rt.RSetPrx.uncheckedCast(current.adapter.addWithUUID(RemoteSet(newiter)))
-            collocProxy = proxy.ice_endpoints([])
-            self._nextId=self._nextId+1
-            print(type(proxy))
-            return proxy
-        if typename == rt.TypeName.RList:
+            rdato=RemoteSet(newiter)
+            if operador == "remove":
+                rtdato.remove(msg)
+            if operador == "length":
+                valor=rtdato.length()
+            if operador == "contains":
+                valor=rtdato.contains(msg)
+            if operador == "hash":
+                valor=rtdato.hash()
+            if operador == "add":
+                rtdato.add(msg)
+            if operador == "pop":
+                valor=rtdato.pop()
+            if operador =="savetofile":
+                rtdato.savetofile()
+            dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
+            producir.putresultado(ident,dvalores)            
+            return True
+
+        if typename == "RList":
+            msg=datos["datos"]
             if len(opt1) != 0 :
                 path='./datos/'+opt1
                 if not os.path.isfile(path):
@@ -42,14 +81,32 @@ class Factory(rt.Factory):
                 iteratio=self._iteratio.next()
             if iteratio == '00000000':
                 print ('Error valor no existe o iteration > 200000')
-                return
+                return False
             newiter=int(iteratio)
-            proxy = rt.RListPrx.uncheckedCast(current.adapter.addWithUUID(RemoteList(newiter)))
-            collocProxy = proxy.ice_endpoints([])
-            self._nextId=self._nextId+1
-            print(type(proxy))
-            return proxy
-        if typename == rt.TypeName.RDict:
+            rdato=RemoteList(newiter)
+            if operador == "remove":
+                rtdato.remove(msg)
+            if operador == "length":
+                valor=rtdato.length()
+            if operador == "contains":
+                valor=rtdato.contains(msg)
+            if operador == "hash":
+                valor=rtdato.hash()
+            if operador == "append":
+                rtdato.append(msg)
+            if operador == "pop":
+                valor=rtdato.pop(msg)
+            if operador =="savetofile":
+                rtdato.savetofile()
+            dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
+            producir.putresultado(ident,dvalores)            
+            return True
+
+        if typename == "RDict":
+            msg=datos["datos"]
+            for i,j in msg.items():
+                msg1=i
+                msg2=j
             if len(opt1) != 0 :
                 path='./datos/'+opt1
                 if not os.path.isfile(path):
@@ -60,13 +117,28 @@ class Factory(rt.Factory):
                 iteratio=self._iteratio.next()
             if iteratio == '00000000':
                 print ('Error valor no existe o iteration > 200000')
-                return
+                return False
             newiter=int(iteratio)
-            proxy = rt.RDictPrx.uncheckedCast(current.adapter.addWithUUID(RemoteDict(newiter)))
-            collocProxy = proxy.ice_endpoints([])
-            self._nextId=self._nextId+1
-            print(type(proxy))
-            return proxy
+            rdato=RemoteDict(newiter)
+            if operador == "remove":
+                rtdato.remove(msg1)
+            if operador == "length":
+                valor=rtdato.length()
+            if operador == "contains":
+                valor=rtdato.contains(msg1)
+            if operador == "hash":
+                valor=rtdato.hash()
+            if operador == "setItem":
+                valor=rtdato.setItem(msg1,msg2)
+            if operador == "getItem":
+                valor=rtdato.getItem(msg1)
+            if operador == "pop":
+                valor=rtdato.pop(msg1)
+            if operador =="savetofile":
+                rtdato.savetofile()
+            dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
+            producir.putresultado(ident,dvalores)
+            return True
 
     def __init__(self):
         self._nextId = 0

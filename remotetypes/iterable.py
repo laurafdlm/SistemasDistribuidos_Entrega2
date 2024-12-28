@@ -1,16 +1,15 @@
 """Needed classes for implementing the Iterable interface for different types of objects."""
 
 import os.path
-import RemoteTypes as rt  # noqa: F401; pylint: disable=import-error
 
 # TODO: It's very likely that the same Iterable implementation doesn't fit
 # for the 3 needed types. It is valid to implement 3 different classes implementing
 # the same interface and use an object from different implementations when needed.
 
 
-class Iterable(rt.Iterable):
+class Iterable():
     """Skeleton for an Iterable implementation."""
-    def next(self) -> str:
+    def next(self):
         while True:
             self._nextId=self._nextId+1
             contador=("000000000"+str(self._nextId))[-8:]

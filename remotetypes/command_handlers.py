@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-from remotetypes.server import Server
+from remotetypes.factory import Factory
 
 
 def remotetypes_server() -> None:
@@ -16,5 +16,5 @@ def remotetypes_server() -> None:
     logger = logging.getLogger(cmd_name)
     logger.info("Running remotetypes server...")
 
-    server = Server()
-    sys.exit(server.main(sys.argv))
+    server = Factory()
+    sys.exit(server.run(sys.argv))

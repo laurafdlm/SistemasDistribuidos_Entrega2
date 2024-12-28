@@ -5,11 +5,12 @@ import sys
 import time
 import os
 shaold=''
-import Ice
-import RemoteTypes as rt 
 import pickle
+from remotetypes.json_server import JsonProducer
+from remotetypes.json_client import JsonConsumer
+from datetime import datetime
 
-def Clientrt(ic):
+def Clientrt():
     datos=list()
     variable=""
     if os.path.isfile("./datos/variables.bin"):
@@ -18,16 +19,10 @@ def Clientrt(ic):
     else:
         datos=[["nombre","tipo","iteration"]]
     global shaold
-    adapter = ic.propertyToProxy("remotetypes.Proxy")
-    try:
-        operador = rt.FactoryPrx.uncheckedCast(adapter)
-    except:
-        print('Error connexión Proxy')
-        time.sleep(3)
-        return(1)
-    print(operador)
     time.sleep(4)
     nueva=1
+    producer=JsonProducer()
+    consumer=JsonConsumer()
     variable=input('Introduce el nombre de la variable()')
     for i in datos:
         if i[0] == variable:
@@ -54,51 +49,24 @@ def Clientrt(ic):
             return(0)
         if numero == 1:
             nombre="Set"
-            tiponombre=rt.TypeName.RSet
-            menus=['remove','length','contains','hash','add','pop','saveTofile']
+            menus=['remove','length','contains','hash','add','pop','savetofile']
             cero=[2,4,6]
             uno=[1,3,5]
             dos=[]
-            try:
-                rtdatmp=operador.get(tiponombre,iteration)
-                rtdato=rt.RSetPrx.checkedCast(rtdatmp)
-            except:
-                print('Error Connexión Servicor')
-                time.sleep(3)
-                return(1)
-            print(type(rtdato))
             break
         if numero == 2:
             nombre="List"
-            tiponombre=rt.TypeName.RList
-            menus=['remove','length','contains','hash','append','pop','getItem','saveTofile']
+            menus=['remove','length','contains','hash','append','pop','getItem','savetofile']
             cero=[2,4]
             uno=[1,3,5,6,7]
             dos=[]
-            try:
-                rtdatmp=operador.get(tiponombre,"")
-                rtdato=rt.RListPrx.checkedCast(rtdatmp)
-            except:
-                print('Error Connexión Servicor')
-                time.sleep(3)
-                return(1)
-            print(type(rtdato))
             break
         if numero == 3:
             nombre="Dict"
-            tiponombre=rt.TypeName.RDict
-            menus=['remove','length','contains','hash','setItem','getItem','pop','saveTofile']
+            menus=['remove','length','contains','hash','setItem','getItem','pop','savetofile']
             cero=[2,4]
             uno=[1,3,6,7]
             dos=[5]
-            try:
-                rtdatmp=operador.get(tiponombre,"")
-                rtdato=rt.RDictPrx.checkedCast(rtdatmp)
-            except:                                                                 
-                print('Error Connexión Servicor')
-                time.sleep(3)
-                return(1)
-            print(type(rtdato))
             break
 
     while True:
@@ -137,90 +105,106 @@ def Clientrt(ic):
                     continue
                 if msg1 == "":
                     break
+            valor=""
+            resultado=""
+            datvalor=""
+            datvalor2=""
             if nombre == "Set":
-                valor=""
                 if operador == 1:
-                    rtdato.remove(msg)
+                    valor="remove"
+                    datvalor=msg
                 if operador == 2:
-                    valor=rtdato.length()
+                    valor="length"
                 if operador == 3:
-                    valor=rtdato.contains(msg)
+                    valor="contains"
+                    datvalor=msg
                 if operador == 4:
-                    valor=rtdato.hash()
+                    valor="hash"
                 if operador == 5:
-                    rtdato.add(msg)
+                    valor="add"
+                    datvalor=msg
                 if operador == 6:
-                    valor=rtdato.pop()
+                    valor="pop"
                 if operador ==7:
-                    rtdato.add('99999999')
-                    valor=rtdato.pop()
-                    if nueva ==0:
-                        for i in datos:
-                            if i[0] == variable:
-                                i[2]=valor
-                    else:
-                        datos.append([variable,nombre,valor])
+                    valor="savetofile"
+
             if nombre == "List":
                 if operador == 1:
-                    rtdato.remove(msg)
+                    valor="remove"
                 if operador == 2:
-                    valor=rtdato.length()
+                    valor="length"
                 if operador == 3:
-                    valor=rtdato.contains(msg)
+                    valor="contains"
+                    datvalor=msg
                 if operador == 4:
-                    valor=rtdato.hash()
+                    valor="hash"
                 if operador == 5:
-                    rtdato.append(msg)
-                    valor=msg
+                    valor="append"
+                    datvalor=msg
                 if operador == 6:
                     try:
                         dat=int(msg)
                     except:
                         print('Error, Necesito el numero de indice')
                         break
-                    valor=rtdato.pop(dat)
+                    valor="pop"
+                    datvalor=dat
                 if operador == 7:
                     try:
                         dat=int(msg)
                     except:
                         print('Error, Necesito el numero de indice')
                         break
-                    valor=rtdato.getItem(dat)
+                    valor="getItem"
+                    datvalor=dat
                 if operador ==8:
-                    valor=rtdato.pop(99999999)
-                    if nueva ==0:
-                        for i in datos:
-                            if i[0] == variable:
-                                i[2]=valor
-                    else:
-                        datos.append([variable,nombre,valor])
+                    valor="savetofile"
 
             if nombre == "Dict":
                 if operador == 1:
-                    rtdato.remove(msg)
+                    valor="remove"
+                    datvalor=msg
                 if operador == 2:
-                    valor=rtdato.length()
+                    valor="length"
                 if operador == 3:
-                    valor=rtdato.contains(msg)
+                    valor="contains"
+                    datvalor=msg
                 if operador == 4:
-                    valor=rtdato.hash()
+                    valor="hash"
                 if operador == 5:
-                    rtdato.setItem(msg1,msg2)
-                    valor=rtdato.getItem(msg1)
+                    valor="setItem"
+                    datvalor=msg1
+                    datvalor2=msg2
                 if operador == 6:
-                    valor=rtdato.getItem(msg)
+                    valor="getItem"
+                    datvalor=msg
                 if operador == 7:
-                    valor=rtdato.pop(msg)
+                    valor="pop"
+                    datvalor=msg
                 if operador ==8:
-                    valor=rtdato.pop('99999999')
-                    if nueva ==0:
-                        for i in datos:
-                            if i[0] == variable:
-                                i[2]=valor
-                    else:
-                        datos.append([variable,nombre,valor])
+                    valor="savetofile"
+            #Funcion get   
+            ident=datetime.today().strftime('%y%m%d%H%M%S%f')
+            if valor=="setItem":
+                datenv=dict(datvalor:datvalor2)
+            else:
+                datenv=list(datvalor)
+            valores=dict(ident=ident,
+                        object_identifier=iteration,
+                        object_type=nombre,
+                        operation=valor,datos=datvalor)
 
-            print(valor)
-            time.sleep(1)
+
+            producer.putoperation("mi_pruebas10",valores)
+            time.sleep(2)
+            resultados=consumer.get(ident)
+            if nueva ==0:
+                for i in datos:
+                    if i[0] == variable:
+                        i[2]=resultados["idvalor"]
+            else:
+                datos.append([variable,nombre,resultados["idvalor"]])
+            print("En la variable {} tipo {} con el ID {} y la función {} el valor optenido es {} es {}".format(variable,nombre,resultados["idvalor"],valor,resultados["result"],resultados["status"])
+            time.sleep(2)
             break
 

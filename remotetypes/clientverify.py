@@ -4,21 +4,15 @@ import logging
 import sys
 import time
 import os
-import Ice
-import RemoteTypes as rt 
+from remotetypes.json_server import JsonProducer
+from remotetypes.json_client import JsonConsumer
+from datetime import datetime
 
-def Clientverify(ic):
+def Clientverify():
     global datos
     global shaold
-    adapter = ic.propertyToProxy("remotetypes.Proxy")
-    try:
-        operador = rt.FactoryPrx.uncheckedCast(adapter)
-    except:
-        print('Error connexión Proxy')
-        time.sleep(3)
-        return(0)
-    print(operador)
-    time.sleep(4)
+    producir=JsonProducer()
+    consumir=JsonConsumer()
     g=open("./datos/comprobado.txt","w+")
     with open("./datos/resultado.txt","r") as f:
         while line :=f.readline():
@@ -30,48 +24,40 @@ def Clientverify(ic):
                 print("Final o dato erroneo")
                 return(0)
             if dato[1] =="Set":
-                tiponombre=rt.TypeName.RSet
-                try:
-                    rtdatmp=operador.get(tiponombre,datmp)
-                    rtdato=rt.RSetPrx.checkedCast(rtdatmp)
-                except:
-                    print('Error Connexión Servidor')
-                    time.sleep(3)
-                    return(0)
-                print(type(rtdato))
                 valor=""
-                rtdato.add('88888888')
-                valor=rtdato.pop()
-                salva=dato[0]+' '+dato[1]+' '+valor
+                ident=datetime.today().strftime('%y%m%d%H%M%S%f')
+                valores=dict(ident=ident,
+                    object_identifier=dato[0],
+                    object_type=dato[1]
+                    operation="pop",datos="88888888")
+                producir.putoperation("mi_pruebas10",valores)
+                time.sleep(2)
+                resultados=consumir.getval(ident)
+                salva=dato[0]+' '+dato[1]+' '+resultados['result']
                 g.write( salva + "\n")
             if dato[1] =="List":
-                tiponombre=rt.TypeName.RList
-                try:
-                    print(dato[2])
-                    rtdatmp=operador.get(tiponombre,datmp)
-                    rtdato=rt.RListPrx.checkedCast(rtdatmp)
-                except:
-                    print('Error Connexión Servidor')
-                    time.sleep(3)
-                    return(0)
-                print(type(rtdato))
                 valor=""
-                valor=rtdato.pop(88888888)
-                salva=dato[0]+' '+dato[1]+' '+valor
+                ident=datetime.today().strftime('%y%m%d%H%M%S%f')
+                valores=dict(ident=ident,
+                    object_identifier=dato[0],
+                    object_type=dato[1]
+                    operation="pop",datos=88888888)
+                producir.putoperation("mi_pruebas10",valores)
+                time.sleep(2)
+                resultados=consumir.getval(ident)
+                salva=dato[0]+' '+dato[1]+' '+resultados['result']
                 g.write( salva + "\n")
             if dato[1] =="Dict":
-                tiponombre=rt.TypeName.RDict
-                try:
-                    rtdatmp=operador.get(tiponombre,datmp)
-                    rtdato=rt.RDictPrx.checkedCast(rtdatmp)
-                except:
-                    print('Error Connexión Servidor')
-                    time.sleep(3)
-                    return(0)
-                print(type(rtdato))
                 valor=""
-                valor=rtdato.pop('88888888')
-                salva=dato[0]+' '+dato[1]+' '+valor
+                ident=datetime.today().strftime('%y%m%d%H%M%S%f')
+                valores=dict(ident=ident,
+                    object_identifier=dato[0],
+                    object_type=dato[1]
+                    operation="pop",datos="88888888")
+                producir.putoperation("mi_pruebas10",valores)
+                time.sleep(2)
+                resultados=consumir.getval(ident)
+                salva=dato[0]+' '+dato[1]+' '+resultados['result']
                 g.write( salva + "\n")
     f.close()
     g.close()
