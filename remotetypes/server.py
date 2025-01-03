@@ -2,30 +2,57 @@
 
 import logging
 
-import Ice
-
 from remotetypes.factory import Factory
+from remotetypes.iterable import Iterable
+from remotetypes.json_client import JsonConsumer
+import time
+import os.path
+import os, sys
+import json
 
-
-class Server(Ice.Application):
-    """Ice.Application for the server."""
-
+class Server():
     def __init__(self) -> None:
+        self.olddatos={'0':'0'}
+        self._iteratio = Iterable()
+        super().__init__()
+        self.logger = logging.getLogger(__file__)
         """Initialise the Server objects."""
         super().__init__()
         self.logger = logging.getLogger(__file__)
-
     def run(self, args: list[str]) -> int:
-        """Execute the main server actions..
-
-        It will initialise the needed middleware elements in order to execute the server.
-        """
-        factory_servant = Factory()
-        adapter = self.communicator().createObjectAdapter("remotetypes")
-        proxy = adapter.add(factory_servant, self.communicator().stringToIdentity("factory"))
-        self.logger.info('Proxy: "%s"', proxy)
-
-        adapter.activate()
-        self.shutdownOnInterrupt()
-        self.communicator().waitForShutdown()
+        if len(args) != 3:
+            print("remotetypes topic_name server_kafka")
+            return 1
+        factory=Factory()
+        consumir=JsonConsumer()
+        topic_name=args[1]
+        server_kafka=args[2]
+        print("Server_Kafka={},Topic_name={}".format(server_kafka,topic_name))
+        while True:
+            resultados=consumir.getval(topic_name,server_kafka,topic_name)
+            if resultados != []:
+                for i in resultados:
+                    idobject=i["object_identifier"]
+                    path='./datos/'+idobject
+                    if os.path.isfile(path):
+                        iteratio=idobject
+                    else:
+                        if idobject in self.olddatos:
+                            iteratio=self.olddatos[idobject]
+                            i["object_identifier"]=iteratio
+                        else:
+                            iteratio=self._iteratio.next()
+                            if iteratio == '00000000':
+                                print ('Error valor iteration > 200000')
+                                return False
+                            self.olddatos[idobject]=iteratio
+                            i["object_identifier"]=iteratio
+                    print(iteratio)
+                    estado=factory.get(i,server_kafka)
+            try:
+                time.sleep(2)
+            except KeyboardInterrupt:
+                print ("Crtl+C Pressed. Shutting down.")
+                return 0
+            # your code here
         return 0

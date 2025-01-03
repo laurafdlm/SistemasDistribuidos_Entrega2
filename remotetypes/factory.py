@@ -6,51 +6,45 @@ from remotetypes.remoteset import RemoteSet
 from remotetypes.remotedict import RemoteDict
 from remotetypes.iterable import Iterable
 from remotetypes.json_server import JsonProducer
-from remotetypes.json_client import JsonConsumer
 import time
 import os.path
 import os, sys
+import json
 
 class Factory():
 
     def __init__(self) -> None:
+        self.olddata=[]
         """Initialise the Server objects."""
-        super().__init__()
-        self.logger = logging.getLogger(__file__)
-    def run(self, args: list[str]) -> int:
+    def get(self,datos,server_kafka):
         producir=JsonProducer()
-        consumir=JsonConsumer()
-        factory=Factory()
-        while True:
-            resultados=consumir.getval('mi_pruebas10')
-            if resultados != "":
-                for i in resultados:
-                    estado=factory.get(i)
-            time.sleep(1)
-            # your code here
-
-    """Skeleton for the Factory implementation."""
-    def get(self,datos):
         ident=datos["ident"]
         typename=datos["object_type"]
-        opt1=datos["object_identifier"]
+        iteratio=datos["object_identifier"]
         operador=datos["operation"]
-        if typename == "RSet":
+        path='./datos/'+iteratio
+        if typename == "Set":
             msg=datos["datos"]
-            if len(opt1) != 0 :
-                path='./datos/'+opt1
-                if not os.path.isfile(path):
-                     iteratio='00000000'
-                else:
-                    iteratio=opt1
-            else:
-                iteratio=self._iteratio.next()
-            if iteratio == '00000000':
-                print ('Error valor no existe o iteration > 200000')
-                return False
-            print(iteratio)
             newiter=int(iteratio)
-            rdato=RemoteSet(newiter)
+            rtdato=RemoteSet(newiter)
+            path='./datos/'+iteratio
+            if os.path.isfile(path):
+                with open(path,'r') as f:
+                    loaded_set = json.load(f)
+                    self.olddata=loaded_set
+                    for i in loaded_set:
+                        print(i)
+                        funcup=i["operation"]
+                        valup=i["datos"]
+                        if funcup == "remove":
+                            rtdato.remove(valup)
+                        if funcup == "add":
+                            rtdato.add(valup)
+                        if funcup == "pop":
+                            valor=rtdato.pop()
+                valor=rtdato.leervalor()
+                print(valor)
+            valor=""
             if operador == "remove":
                 rtdato.remove(msg)
             if operador == "length":
@@ -63,27 +57,40 @@ class Factory():
                 rtdato.add(msg)
             if operador == "pop":
                 valor=rtdato.pop()
-            if operador =="savetofile":
-                rtdato.savetofile()
+            if operador =="leervalor":
+                valor=rtdato.leervalor()
             dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
-            producir.putresultado(ident,dvalores)            
-            return True
+            producir.putval(ident,server_kafka,dvalores)
+            datenv=dict(ident=ident,
+                        object_identifier=iteratio,
+                        object_type=typename,
+                        operation=operador,datos=msg)
+            self.olddata.append(datenv)
+            with open(path, 'w') as f:
+                json.dump(self.olddata, f)
 
-        if typename == "RList":
+        if typename == "List":
             msg=datos["datos"]
-            if len(opt1) != 0 :
-                path='./datos/'+opt1
-                if not os.path.isfile(path):
-                     iteratio='00000000'
-                else:
-                    iteratio=opt1
-            else:
-                iteratio=self._iteratio.next()
-            if iteratio == '00000000':
-                print ('Error valor no existe o iteration > 200000')
-                return False
             newiter=int(iteratio)
-            rdato=RemoteList(newiter)
+            rtdato=RemoteList(newiter)
+            path='./datos/'+iteratio
+            if os.path.isfile(path):
+                with open(path,'r') as f:
+                    loaded_list = json.load(f)
+                    self.olddata=loaded_list
+                    for i in loaded_list:
+                        print(i)
+                        funcup=i["operation"]
+                        valup=i["datos"]
+                        if funcup == "remove":
+                            rtdato.remove(valup)
+                        if funcup == "append":
+                            rtdato.append(valup)
+                        if funcup == "pop":
+                            valor=rtdato.pop(valup)
+                valor=rtdato.leervalor()
+                print(valor)
+            valor=""
             if operador == "remove":
                 rtdato.remove(msg)
             if operador == "length":
@@ -93,53 +100,78 @@ class Factory():
             if operador == "hash":
                 valor=rtdato.hash()
             if operador == "append":
+                print(msg)
                 rtdato.append(msg)
             if operador == "pop":
                 valor=rtdato.pop(msg)
-            if operador =="savetofile":
-                rtdato.savetofile()
+            if operador == "getItem":
+                valor=rtdato.getItem(msg)
+            if operador =="leervalor":
+                valor=rtdato.leervalor()
             dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
-            producir.putresultado(ident,dvalores)            
+            producir.putval(ident,server_kafka,dvalores)
+            datenv=dict(ident=ident,
+                        object_identifier=iteratio,
+                        object_type=typename,
+                        operation=operador,datos=msg)
+            self.olddata.append(datenv)
+            with open(path, 'w') as f:
+                json.dump(self.olddata, f)
             return True
 
-        if typename == "RDict":
+        if typename == "Dict":
             msg=datos["datos"]
-            for i,j in msg.items():
-                msg1=i
-                msg2=j
-            if len(opt1) != 0 :
-                path='./datos/'+opt1
-                if not os.path.isfile(path):
-                     iteratio='00000000'
-                else:
-                    iteratio=opt1
-            else:
-                iteratio=self._iteratio.next()
-            if iteratio == '00000000':
-                print ('Error valor no existe o iteration > 200000')
-                return False
             newiter=int(iteratio)
-            rdato=RemoteDict(newiter)
+            rtdato=RemoteDict(newiter)
+            path='./datos/'+iteratio
+            if os.path.isfile(path):
+                with open(path,'r') as f:
+                    loaded_dict = json.load(f)
+                    self.olddata=loaded_dict
+                    for i in loaded_dict:
+                        funcup=i["operation"]
+                        valup=i["datos"]
+                        if funcup == "remove":
+                            rtdato.remove(valup)
+                        if funcup == "setItem":
+                            try:
+                                vartmp=eval(valup)
+                            except:
+                                vartmp=[None,None]
+                            valor=rtdato.setItem(vartmp[0],vartmp[1])
+                        if funcup == "pop":
+                            valor=rtdato.pop(valup)
+                valor=rtdato.leervalor()
+                print(valor)
+            valor=""
             if operador == "remove":
-                rtdato.remove(msg1)
+                rtdato.remove(msg)
             if operador == "length":
                 valor=rtdato.length()
             if operador == "contains":
-                valor=rtdato.contains(msg1)
+                valor=rtdato.contains(msg)
             if operador == "hash":
                 valor=rtdato.hash()
             if operador == "setItem":
-                valor=rtdato.setItem(msg1,msg2)
+                try:
+                    vartmp=eval(msg)
+                except:
+                    vartmp=[None,None]
+                rtdato.setItem(vartmp[0],vartmp[1])
             if operador == "getItem":
-                valor=rtdato.getItem(msg1)
+                valor=rtdato.getItem(msg)
             if operador == "pop":
-                valor=rtdato.pop(msg1)
-            if operador =="savetofile":
-                rtdato.savetofile()
+                valor=rtdato.pop(msg)
+            if operador =="leervalor":
+                valor=rtdato.leervalor()
             dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
-            producir.putresultado(ident,dvalores)
+            producir.putval(ident,server_kafka,dvalores)
+            datenv=dict(ident=ident,
+                        object_identifier=iteratio,
+                        object_type=typename,
+                        operation=operador,datos=msg)
+            self.olddata.append(datenv)
+            with open(path, 'w') as f:
+                json.dump(self.olddata, f)
             return True
 
-    def __init__(self):
-        self._nextId = 0
-        self._iteratio = Iterable()

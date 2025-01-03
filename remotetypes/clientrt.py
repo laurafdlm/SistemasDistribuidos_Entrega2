@@ -9,18 +9,30 @@ import pickle
 from remotetypes.json_server import JsonProducer
 from remotetypes.json_client import JsonConsumer
 from datetime import datetime
+import random
 
-def Clientrt():
+def Clientrt(topic_name,server_kafka):
+    def handler(signum, frame):
+        raise TimeoutError("Tiempo límite alcanzado")
     datos=list()
+    if os.path.isfile("./datos/registro.bin"):
+        with open("./datos/registro.bin","rb") as f:
+            registro = pickle.load(f)
+    else:
+        registro=str(random.randint(10000000, 99999999))
+        with open("./datos/registro.bin","wb") as f:
+            pickle.dump(registro,f)
     variable=""
     if os.path.isfile("./datos/variables.bin"):
         with open("./datos/variables.bin","rb") as f:
             datos = pickle.load(f)
     else:
         datos=[["nombre","tipo","iteration"]]
-    global shaold
     time.sleep(4)
     nueva=1
+    msg=""
+    msg1=""
+    msg2=""
     producer=JsonProducer()
     consumer=JsonConsumer()
     variable=input('Introduce el nombre de la variable()')
@@ -30,44 +42,40 @@ def Clientrt():
                 tipodato="1"
             elif i[1] == 'List':
                 tipodato="2"
-            else:
+            else: 
                 tipodato="3"
-            iteration=i[2]
+            iteratio=i[2]
             nueva=0
     if nueva == 1:
-        tipodato=input('Tipo de datos: (0-Salir,1-Set,2-List,3-Dict)')
-        iteration=""
-
-    while True:
-        try:
-            numero=int(tipodato)
-        except:
-            numero=0
-        if numero == 0:
-            with open("./datos/variables.bin","wb") as f:
-                pickle.dump(datos,f)
-            return(0)
-        if numero == 1:
-            nombre="Set"
-            menus=['remove','length','contains','hash','add','pop','savetofile']
-            cero=[2,4,6]
-            uno=[1,3,5]
-            dos=[]
-            break
-        if numero == 2:
-            nombre="List"
-            menus=['remove','length','contains','hash','append','pop','getItem','savetofile']
-            cero=[2,4]
-            uno=[1,3,5,6,7]
-            dos=[]
-            break
-        if numero == 3:
-            nombre="Dict"
-            menus=['remove','length','contains','hash','setItem','getItem','pop','savetofile']
-            cero=[2,4]
-            uno=[1,3,6,7]
-            dos=[5]
-            break
+        listdat=['0','1','2','3']
+        while True:
+            tipodato=input('Tipo de datos: (0-Salir,1-Set,2-List,3-Dict)')
+            if tipodato in listdat:
+                break
+        iteratio=variable + registro
+    numero=int(tipodato)
+    if numero == 0:
+        with open("./datos/variables.bin","wb") as f:
+            pickle.dump(datos,f)
+        return(0)
+    if numero == 1:
+        nombre="Set"
+        menus=['remove','length','contains','hash','add','pop','leervalor']
+        cero=[2,4,6]
+        uno=[1,3,5]
+        dos=[]
+    if numero == 2:
+        nombre="List"
+        menus=['remove','length','contains','hash','append','pop','getItem','leervalor']
+        cero=[2,4]
+        uno=[1,3,5,6,7]
+        dos=[]
+    if numero == 3:
+        nombre="Dict"
+        menus=['remove','length','contains','hash','setItem','getItem','pop','leervalor']
+        cero=[2,4]
+        uno=[1,3,6,7]
+        dos=[5]
 
     while True:
         contador=1
@@ -83,7 +91,9 @@ def Clientrt():
         if operador == 0:
             with open("./datos/variables.bin","wb") as f:
                 pickle.dump(datos,f)
-            return(0)    
+            return(0)  
+        if operador >= contador:
+            continue
         while True:
             if operador in uno:
                 dattmp=input('Introduce el valor o key necesario(Solo caracteres)')
@@ -126,7 +136,7 @@ def Clientrt():
                 if operador == 6:
                     valor="pop"
                 if operador ==7:
-                    valor="savetofile"
+                    valor="leervalor"
 
             if nombre == "List":
                 if operador == 1:
@@ -158,7 +168,7 @@ def Clientrt():
                     valor="getItem"
                     datvalor=dat
                 if operador ==8:
-                    valor="savetofile"
+                    valor="leervalor"
 
             if nombre == "Dict":
                 if operador == 1:
@@ -173,8 +183,7 @@ def Clientrt():
                     valor="hash"
                 if operador == 5:
                     valor="setItem"
-                    datvalor=msg1
-                    datvalor2=msg2
+                    datvalor=[msg1,msg2]
                 if operador == 6:
                     valor="getItem"
                     datvalor=msg
@@ -182,29 +191,39 @@ def Clientrt():
                     valor="pop"
                     datvalor=msg
                 if operador ==8:
-                    valor="savetofile"
+                    valor="leervalor"
+
+                
             #Funcion get   
-            ident=datetime.today().strftime('%y%m%d%H%M%S%f')
-            if valor=="setItem":
-                datenv=dict(datvalor:datvalor2)
-            else:
-                datenv=list(datvalor)
+#            ident=datetime.today().strftime('%y%m%d%H%M%S%f')
+            ident=datetime.today().strftime('%M%S%f')
+            datenv=str(datvalor)
             valores=dict(ident=ident,
-                        object_identifier=iteration,
+                        object_identifier=iteratio,
                         object_type=nombre,
-                        operation=valor,datos=datvalor)
-
-
-            producer.putoperation("mi_pruebas10",valores)
+                        operation=valor,datos=datenv)
+            print(valores)
+            resultado=producer.putval(topic_name,server_kafka,valores)
+            if resultado==0:
+                print("ok")
+#            print("\nFlushing records...")
+#            producer.flush()
             time.sleep(2)
-            resultados=consumer.get(ident)
-            if nueva ==0:
-                for i in datos:
-                    if i[0] == variable:
-                        i[2]=resultados["idvalor"]
-            else:
-                datos.append([variable,nombre,resultados["idvalor"]])
-            print("En la variable {} tipo {} con el ID {} y la función {} el valor optenido es {} es {}".format(variable,nombre,resultados["idvalor"],valor,resultados["result"],resultados["status"])
+            resultmp=consumer.getval(ident,server_kafka,ident)
+            resultados=resultmp[0]
+            try:
+                if nueva ==0:
+                    for i in datos:
+                        if i[0] == variable:
+                            i[2]=resultados["idvalor"]
+                else:
+                    print(resultados['idvalor'])
+                    datos.append([variable,nombre,resultados['idvalor']])
+                    print(datos)
+                print("En la variable {} tipo {} con el ID {} y la función {} el valor optenido es {} es {}".format(variable,nombre,resultados["idvalor"],valor,resultados["result"],resultados["status"]))
+            except:
+                print("No tengo resultado")
+                break
             time.sleep(2)
             break
 

@@ -1,9 +1,6 @@
 """Needed classes to implement and serve the RList type."""
 from typing import Optional
-import pickle
 from remotetypes.customset import StringList
-import os.path
-from remotetypes.iterable import Iterable
 
 class RemoteList():
     """Skelenton for the RList implementation."""
@@ -16,27 +13,10 @@ class RemoteList():
         self.iter=("000000000"+str(self.id_))[-8:]
         self.path='./datos/'+self.iter
         self.fecha=0.0
-        self._iteratio = Iterable()
-        if os.path.isfile(self.path):
-            self.loadtofile()
-            self.fecha=os.path.getmtime(self.path)
 
-    def savetofile(self):
-        print ('Save a list to a file with id ',self.iter)
-        fechact=float(-1)
-        if os.path.isfile(self.path):
-            fechact=os.path.getmtime(self.path)
-        if fechact > self.fecha:
-            self.iter=self._iteratio.next()
-        with open('./datos/'+self.iter, 'wb') as f:
-            pickle.dump(list(self._storage_), f)
-
-    def loadtofile(self):
-        with open('./datos/'+self.iter, 'rb') as f:
-            loaded_set = pickle.load(f)
-        print(loaded_set)
-        for i in loaded_set:
-            self._storage_.append(i)
+    def leervalor(self):
+        print ('Leer lista con el  id ',self.iter)
+        return str(self._storage_)
 
     def identifier(self):
         """Return the identifier of the object."""
@@ -53,7 +33,9 @@ class RemoteList():
     def getItem(self, item: int):
         """getItem and return an element from the storage."""
         try:
-            return self._storage_.getItem(item)
+            vartmp=int(item)
+            if vartmp < self.length():
+                return self._storage_.getItem(vartmp)
         except:
             print("Error getItem")
 
@@ -64,7 +46,7 @@ class RemoteList():
 
     def contains(self, item: str):
         """Check the pertenence of an item to the StringList."""
-        return item in self._storage_
+        return str(item in self._storage_)
 
     def hash(self):
         """Calculate a hash from the content of the internal StringList."""
@@ -79,13 +61,14 @@ class RemoteList():
         """Add a new string to the StringList."""
         self._storage_.append(item)
 
-    def pop(self, item: int):
+    def pop(self, item: str):
         """Remove and return an element with item from the storage."""
-        if item == 88888888:
+        if item == '88888888':
             return str(self._storage_)
-        if item < self.length():
-            try:
-                return self._storage_.pop(item)
-            except:
-                print("Error pop")
+        try:
+            vartmp=int(item)
+            if vartmp < self.length():
+                return self._storage_.pop(vartmp)
+        except:
+            print("Error pop")
 

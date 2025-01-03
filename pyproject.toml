@@ -11,7 +11,7 @@ authors = [
 ]
 description = "Template for rDistributed Systems laboratory"
 requires-python = ">=3.10"
-dependencies = ['zeroc-ice','fs','confluent-kafka']
+dependencies = ['fs','confluent-kafka']
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -38,13 +38,4 @@ line-length = 120
 # McCabe complexity (`C901`) by default.
 select = ["E", "W", "F", "D"]
 ignore = ["D203", "D213"]
-
-[tool.pylint.TYPECHECK]
-ignored-classes = ["Ice"]
-
-[[tool.mypy.overrides]]
-module = [
-  "Ice",
-  "RemoteTypes"
-]
 ignore_missing_imports = true
