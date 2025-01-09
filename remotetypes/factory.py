@@ -6,6 +6,7 @@ from remotetypes.remoteset import RemoteSet
 from remotetypes.remotedict import RemoteDict
 from remotetypes.iterable import Iterable
 from remotetypes.json_server import JsonProducer
+from remotetypes.json_crear import TopicManager
 import time
 import os.path
 import os, sys
@@ -22,12 +23,14 @@ class Factory():
         typename=datos["object_type"]
         iteratio=datos["object_identifier"]
         operador=datos["operation"]
+        newtopic=TopicManager(server_kafka)
         path='./datos/'+iteratio
         if typename == "Set":
             msg=datos["datos"]
             newiter=int(iteratio)
             rtdato=RemoteSet(newiter)
             path='./datos/'+iteratio
+            self.olddata.clear()
             if os.path.isfile(path):
                 with open(path,'r') as f:
                     loaded_set = json.load(f)
@@ -59,6 +62,7 @@ class Factory():
                 valor=rtdato.pop()
             if operador =="leervalor":
                 valor=rtdato.leervalor()
+            newtopic.create_topic(ident)
             dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
             producir.putval(ident,server_kafka,dvalores)
             datenv=dict(ident=ident,
@@ -108,6 +112,7 @@ class Factory():
                 valor=rtdato.getItem(msg)
             if operador =="leervalor":
                 valor=rtdato.leervalor()
+            newtopic.create_topic(ident)
             dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
             producir.putval(ident,server_kafka,dvalores)
             datenv=dict(ident=ident,
@@ -164,6 +169,7 @@ class Factory():
                 valor=rtdato.pop(msg)
             if operador =="leervalor":
                 valor=rtdato.leervalor()
+            newtopic.create_topic(ident)
             dvalores=dict(ident=ident,status="ok",result=valor,idvalor=iteratio,error="")
             producir.putval(ident,server_kafka,dvalores)
             datenv=dict(ident=ident,

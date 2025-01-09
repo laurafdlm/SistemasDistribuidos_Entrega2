@@ -8,6 +8,7 @@ shaold=''
 import pickle
 from remotetypes.json_server import JsonProducer
 from remotetypes.json_client import JsonConsumer
+from remotetypes.json_crear import TopicManager
 from datetime import datetime
 import random
 
@@ -35,6 +36,7 @@ def Clientrt(topic_name,server_kafka):
     msg2=""
     producer=JsonProducer()
     consumer=JsonConsumer()
+    newtopic=TopicManager(server_kafka)
     variable=input('Introduce el nombre de la variable()')
     for i in datos:
         if i[0] == variable:
@@ -208,9 +210,14 @@ def Clientrt(topic_name,server_kafka):
                 print("ok")
 #            print("\nFlushing records...")
 #            producer.flush()
-            time.sleep(2)
+            time.sleep(4)
             resultmp=consumer.getval(ident,server_kafka,ident)
-            resultados=resultmp[0]
+            newtopic.delete_topic(ident)
+            try:
+                resultados=resultmp[0]
+            except:
+                print("Error Servidor")
+                return
             try:
                 if nueva ==0:
                     for i in datos:
@@ -220,7 +227,7 @@ def Clientrt(topic_name,server_kafka):
                     print(resultados['idvalor'])
                     datos.append([variable,nombre,resultados['idvalor']])
                     print(datos)
-                print("En la variable {} tipo {} con el ID {} y la función {} el valor optenido es {} es {}".format(variable,nombre,resultados["idvalor"],valor,resultados["result"],resultados["status"]))
+                print("En la variable {} tipo {} con el ID {} y la función {} el valor obtenido es {} es {}".format(variable,nombre,resultados["idvalor"],valor,resultados["result"],resultados["status"]))
             except:
                 print("No tengo resultado")
                 break

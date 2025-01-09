@@ -16,7 +16,8 @@ class JsonConsumer():
 
         consumer_conf = {'bootstrap.servers': server,
                      'group.id': idgrupo,
-                     'auto.offset.reset': "earliest"}
+                     'auto.offset.reset': "earliest",
+                     'enable.auto.commit': True,}
 
         consumer = Consumer(consumer_conf)
         consumer.subscribe([topic])
@@ -55,7 +56,7 @@ class JsonConsumer():
 
         try:
             print('Starting consumer polling...')
-            self.ldata=[]
+            self.ldata.clear()
             while True:
                 # Realizar el polling (espera máximo 1 segundo)
                 msg = consumer.poll(1.0)

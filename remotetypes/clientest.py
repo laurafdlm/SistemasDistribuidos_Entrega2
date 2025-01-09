@@ -6,100 +6,139 @@ import time
 import os
 from remotetypes.json_server import JsonProducer
 from remotetypes.json_client import JsonConsumer
+from remotetypes.json_crear import TopicManager
 from datetime import datetime
+import random
+import pickle
 
-def Clientest():
+def Clientest(topic_name,server_kafka,iteratio,dato):
+    nuevo=1
     g=open("./datos/resultado.txt","w+")
     datlist=list()
     producir=JsonProducer()
     consumir=JsonConsumer()
-    with open("./datos/source.txt","r") as f:
-        while line :=f.readline():
-            dato=line.split(" ")
-            print (dato[0])
+    newtopic=TopicManager(server_kafka)
+    if dato[1] =="Set":
+        resultados=""
+        valor="add"
+        for i in dato[2].split(','):
+            ident='test'+str(random.randint(10000000, 99999999))
+            valores=dict(ident=ident,
+                object_identifier=iteratio,
+                object_type=dato[1],
+                operation=valor,datos=str(i))
+            producir.putval(topic_name,server_kafka,valores)
+            time.sleep(4)
+            resultmp=consumir.getval(ident,server_kafka,ident)
+            newtopic.delete_topic(ident)
             try:
-                datmp=dato[2].replace('\n', '')
+                resultados=resultmp[0]
             except:
-                if dato[0]=='00000000\n':
-                    g.write('00000000')
-                    print("Final")
-                    return(0)
-                else:
-                    print("Dato erroneo")
-                    return(1) 
-            if dato[1] =="Set":
-                valor=set(datmp.split(','))
-                print (valor)
-                print(type(valor))
-                valor=""
-                for i in datmp.split(','):
-                    ident=datetime.today().strftime('%y%m%d%H%M%S%f')
-                     valores=dict(ident=ident,
-                        object_identifier=dato[0],
-                        object_type=dato[1],
-                        operation=valor,datos=i)
-                    producir.putoperation("mi_pruebas10",valores)
-                    time.sleep(2)
-                    resultados=consumir.getval(ident)
-                ident=datetime.today().strftime('%y%m%d%H%M%S%f')
-                valores=dict(ident=ident,
-                    object_identifier=dato[0],
-                    object_type=dato[1]
-                    operation="savetofile",datos="")
-                producir.putoperation("mi_pruebas10",valores)
-                time.sleep(2)
-                resultados=consumir.getval(ident)
-                salva=dato[0]+' '+dato[1]+' '+resultados["idvalor"]
-                g.write( salva + "\n")
-            if dato[1] =="List":
-                valor=list(datmp.split(','))
-                print (valor)
-                print(type(valor))
-                for i in datmp.split(','):
-                    ident=datetime.today().strftime('%y%m%d%H%M%S%f')
-                    valores=dict(ident=ident,
-                        object_identifier=dato[0],
-                        object_type=dato[1],
-                        operation=valor,datos=i)
-                    producir.putoperation("mi_pruebas10",valores)
-                    time.sleep(2)
-                    resultados=consumir.getval(ident)
-                ident=datetime.today().strftime('%y%m%d%H%M%S%f')
-                valores=dict(ident=ident,
-                    object_identifier=dato[0],
-                    object_type=dato[1]
-                    operation="savetofile",datos="")
-                producir.putoperation("mi_pruebas10",valores)
-                time.sleep(2)
-                resultados=consumir.getval(ident)
-                salva=dato[0]+' '+dato[1]+' '+resultados["idvalor"]
-                g.write( salva + "\n")
-            if dato[1] =="Dict":
-                valor=dict(item.split(':')
-                for item in datmp.split(','))
-                print (valor)
-                print(type(valor))
-                for i in datmp.split(','):
-                    j=i.split(':')
-                    valtmp=dict{j[0]=j[1])
-                    ident=datetime.today().strftime('%y%m%d%H%M%S%f')
-                     valores=dict(ident=ident,
-                        object_identifier=dato[0],
-                        object_type=dato[1],
-                        operation=valor,datos=i)
-                    producir.putoperation("mi_pruebas10",valtmp)
-                    time.sleep(2)
-                    resultados=consumir.getval(ident)
-                ident=datetime.today().strftime('%y%m%d%H%M%S%f')
-                valores=dict(ident=ident,
-                    object_identifier=dato[0],
-                    object_type=dato[1]
-                    operation="savetofile",datos="")
-                producir.putoperation("mi_pruebas10",valores)
-                time.sleep(2)
-                resultados=consumir.getval(ident)
-                salva=dato[0]+' '+dato[1]+' '+resultados["idvalor"]
-                g.write( salva + "\n")
-    f.close()
+                print("Error Servidor")
+                return
+            print(resultados)
+            if nuevo == 1:
+                iteratio=resultados['idvalor']
+                nuevo = 0
+        resultados=""
+        ident='test'+str(random.randint(10000000, 99999999))
+        valores=dict(ident=ident,
+            object_identifier=iteratio,
+            object_type=dato[1],
+            operation="leervalor",datos="")
+        producir.putval(topic_name,server_kafka,valores)
+        time.sleep(4)
+        resultmp=consumir.getval(ident,server_kafka,ident)
+        newtopic.delete_topic(ident)
+        try:
+            resultados=resultmp[0]
+        except:
+            print("Error Servidor")
+            return
+        print(resultados)
+        salva=str(dato[0])+' '+str(dato[1])+' '+str(resultados)
+        g.write( salva + "\n")
+    if dato[1] =="List":
+        resultados=""
+        valor='append'
+        for i in dato[2].split(','):
+            ident='test'+str(random.randint(10000000, 99999999))
+            valores=dict(ident=ident,
+                object_identifier=iteratio,
+                object_type=dato[1],
+                operation=valor,datos=str(i))
+            producir.putval(topic_name,server_kafka,valores)
+            time.sleep(4)
+            resultmp=consumir.getval(ident,server_kafka,ident)
+            newtopic.delete_topic(ident)
+            try:
+                resultados=resultmp[0]
+            except:
+                print("Error Servidor")
+                return
+            print(resultados)
+            if nuevo == 1:
+                iteratio=resultados['idvalor']
+                nuevo = 0
+        resultados=""
+        ident='test'+str(random.randint(10000000, 99999999))
+        valores=dict(ident=ident,
+            object_identifier=iteratio,
+            object_type=dato[1],
+            operation="leervalor",datos="")
+        producir.putval(topic_name,server_kafka,valores)
+        time.sleep(4)
+        resultmp=consumir.getval(ident,server_kafka,ident)
+        newtopic.delete_topic(ident)
+        try:
+            resultados=resultmp[0]
+        except:
+            print("Error Servidor")
+            return
+        print(resultados)
+        salva=str(dato[0])+' '+str(dato[1])+' '+str(resultados)
+        g.write( salva + "\n")
+    if dato[1] =="Dict":
+        valor='setItem'
+        resultados=""
+        for i in dato[2].split(','):
+            j=i.split(':')
+            valtmp=str([j[0],j[1]])
+            ident='test'+str(random.randint(10000000, 99999999))
+            valores=dict(ident=ident,
+                object_identifier=iteratio,
+                object_type=dato[1],
+                operation=valor,datos=valtmp)
+            producir.putval(topic_name,server_kafka,valores)
+            time.sleep(4)
+            resultmp=consumir.getval(ident,server_kafka,ident)
+            newtopic.delete_topic(ident)
+            try:
+                resultados=resultmp[0]
+            except:
+                print("Error Servidor")
+                return
+            print(resultados)
+            if nuevo == 1:
+                iteratio=resultados['idvalor']
+                nuevo = 0
+        resultados=""
+        ident='test'+str(random.randint(10000000, 99999999))
+        valores=dict(ident=ident,
+            object_identifier=iteratio,
+            object_type=dato[1],
+            operation="leervalor",datos="")
+        producir.putval(topic_name,server_kafka,valores)
+        time.sleep(4)
+        resultmp=consumir.getval(ident,server_kafka,ident)
+        newtopic.delete_topic(ident)
+        try:
+            resultados=resultmp[0]
+        except:
+            print("Error Servidor")
+            return
+        print(resultados)
+        salva=str(dato[0])+' '+str(dato[1])+' '+str(resultados)
+        g.write( salva + "\n")
     g.close()
 

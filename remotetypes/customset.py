@@ -27,8 +27,8 @@ class StringSet(set):
     def add(self, item: str) -> None:
         """Add an element to a set. Checks the element type to be a str."""
         if not isinstance(item, str):
-            print("Error add")
-            return "error"
+            raise ValueError(item)
+
         if self.upper_case:
             item = item.upper()
 
@@ -37,8 +37,7 @@ class StringSet(set):
     def remove(self, item: str) -> None:
         """Remove an element to a set. Checks the element type to be a str."""
         if not isinstance(item, str):
-            print("Error item")
-            return "error"
+            raise ValueError(item)
 
         if self.upper_case:
             item = item.upper()
@@ -86,8 +85,7 @@ class StringList(list):
     def append(self, item: str) -> None:
         """Add an element to a List. Checks the element type to be a str."""
         if not isinstance(item, str):
-            print("Error append")
-            return "error"
+            raise ValueError(item)
 
         if self.upper_case:
             item = item.upper()
@@ -97,8 +95,7 @@ class StringList(list):
     def remove(self, item: str) -> None:
         """Remove an element to a List. Checks the element type to be a str."""
         if not isinstance(item, str):
-            print("Error remove")
-            return "error"
+            raise ValueError(item)
 
         if self.upper_case:
             item = item.upper()
@@ -152,11 +149,9 @@ class StringDict(dict):
     def setItem(self, key: str, item: str) -> str:
         """Add an element to a dict. Checks the element type to be a str."""
         if not isinstance(item, str):
-            print("Error item")
-            return "error"
+            raise ValueError(item)
         if not isinstance(key, str):
-            print("Error key")
-            return "error"
+            raise ValueError(key)
         if self.upper_case:
             item = item.upper()
         if self.upper_case:
@@ -167,8 +162,7 @@ class StringDict(dict):
     def get(self, key: str) -> str:
         """Get an element to a dict. Checks the element type to be a str."""
         if not isinstance(key, str):
-            print("Error key")
-            return "error"
+            raise ValueError(key)
 
         if self.upper_case:
             key = key.upper()
@@ -178,8 +172,7 @@ class StringDict(dict):
     def remove(self, key: str) -> str:
         """Remove an element to a dict. Checks the element type to be a str."""
         if not isinstance(key, str):
-            print("Error key")
-            return "error"
+            raise ValueError(key)
 
         if self.upper_case:
             key = key.upper()
@@ -193,8 +186,7 @@ class StringDict(dict):
     def getItem(self, key: str) -> str:
         """Get an element to a dict. Checks the element type to be a str."""
         if not isinstance(key, str):
-            print("Error key")
-            return "error"
+            raise ValueError(key)
 
         if self.upper_case:
             key = key.upper()

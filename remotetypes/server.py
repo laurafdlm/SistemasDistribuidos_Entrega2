@@ -5,6 +5,7 @@ import logging
 from remotetypes.factory import Factory
 from remotetypes.iterable import Iterable
 from remotetypes.json_client import JsonConsumer
+from remotetypes.json_crear import TopicManager
 import time
 import os.path
 import os, sys
@@ -27,6 +28,8 @@ class Server():
         consumir=JsonConsumer()
         topic_name=args[1]
         server_kafka=args[2]
+        newtopic=TopicManager(server_kafka)
+        newtopic.create_topic(topic_name)
         print("Server_Kafka={},Topic_name={}".format(server_kafka,topic_name))
         while True:
             resultados=consumir.getval(topic_name,server_kafka,topic_name)
@@ -53,6 +56,7 @@ class Server():
                 time.sleep(2)
             except KeyboardInterrupt:
                 print ("Crtl+C Pressed. Shutting down.")
+                newtopic.delete_topic(topic_name)
                 return 0
             # your code here
         return 0
